@@ -100,19 +100,21 @@ public class AndKeysIME extends InputMethodService {
         return root;
     }
 
-    // Send stays connected to the focused app through Android's InputConnection.
-    // Try the editor's declared action first; if none exists, send Enter for editors
-    // (including many web message fields) that bind Enter to their Send behavior.
+    // Send asks the focused editor to submit instead of blindly inserting a newline.
+    // Web editors commonly expose SEND/GO/DONE as IME actions; Ctrl+Enter is a
+    // common submit shortcut for multiline chat editors. Do not fall back to plain
+    // Enter, because that can merely create a new line in a message textarea.
     private void sendAction(){
         InputConnection ic=getCurrentInputConnection();
         if(ic==null) return;
-        EditorInfo info=getCurrentInputEditorInfo();
-        int action=info==null?EditorInfo.IME_ACTION_NONE:(info.imeOptions & EditorInfo.IME_MASK_ACTION);
-        if(action!=EditorInfo.IME_ACTION_NONE && action!=EditorInfo.IME_ACTION_UNSPECIFIED){
+        int[] actions={EditorInfo.IME_ACTION_SEND,EditorInfo.IME_ACTION_GO,EditorInfo.IME_ACTION_DONE};
+        for(int action:actions){
             if(ic.performEditorAction(action)) return;
         }
+        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_CTRL_LEFT));
         ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_ENTER));
         ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_ENTER));
+        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_CTRL_LEFT));
     }
     private void topAction(String label){
         InputConnection ic=getCurrentInputConnection(); if(ic==null)return;
