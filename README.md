@@ -1,22 +1,17 @@
 # AndKeys
 
-An Android Persian/English keyboard project designed for GitHub + MGit.
+Android Persian/English keyboard project for GitHub + MGit, based on the supplied keyboard layout.
 
-## Send button behavior
-`Send` is an in-keyboard editor action. It does **not** connect to, control, or send data to another device. In a website's message editor it asks the focused editor to perform its Send action; if the editor does not expose one, it inserts a newline rather than pretending that a message was sent.
+## Send
+The `Send` key operates through Android's focused editor connection (`InputConnection`), not through a separate device or network service. It asks the focused editor to perform its declared editor action; when no editor action is declared, it sends an Enter key event so websites whose message editors handle Enter can process it. A keyboard cannot universally click a website's separate blue Send button unless that site exposes an editor action or handles Enter.
 
 ## Build with GitHub Actions
-1. Create a GitHub repository named `AndKeys`.
-2. Upload/commit the contents of this ZIP to the repository root using MGit.
-3. Open **Actions** and run **Android Build** (or push a commit).
-4. Download the `AndKeys-debug-apk` artifact from the successful workflow.
-5. Install the APK, then enable AndKeys in Android Settings → System/Language & input → On-screen keyboard (wording varies by device).
+1. Extract this ZIP.
+2. Put the contents of the `AndKeys` folder at the root of a GitHub repository named `AndKeys`.
+3. Commit and push using MGit.
+4. In GitHub, open Actions and download `AndKeys-debug-apk` from a successful run.
 
-The workflow intentionally invokes the installed `gradle` command and does not depend on a missing `gradlew` wrapper.
+Workflow uses Gradle 8.9 installed by the action, so no missing `gradlew` wrapper is needed.
 
-## Local build
-Requires JDK 17, Android SDK platform 35 and Gradle 8.9:
-`gradle assembleDebug`
-
-## Layout
-The keyboard preserves the photographed arrangement as closely as practical. `Send` is the existing top-row button; no extra control is added.
+## Enable
+Install the APK, open AndKeys, tap **Open keyboard settings**, enable AndKeys, then choose it from the Android keyboard picker.
