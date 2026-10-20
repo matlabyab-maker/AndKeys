@@ -24,9 +24,12 @@ public class AndKeysIME extends InputMethodService {
         String[] top = {"Past","Copy","Copy\nScreen","Select","ReDo","UnDo","8\nHistory","Tool","File","Send"};
         LinearLayout r1=row();
         for(String label:top){
-            Button b=key(label,paper,label.contains("\n")?14:18);
+            Button b=key(label, label.equals("Send") ? Color.rgb(25,118,210) : paper,
+                    label.contains("\n")?14:18);
+            if(label.equals("Send")) b.setTextColor(Color.WHITE);
             if(label.equals("Past")||label.equals("ReDo")||label.equals("UnDo")||label.equals("File"))
                 b.setTypeface(Typeface.SERIF);
+            b.setEnabled(true);
             b.setOnClickListener(v->{ if(label.equals("Send")) sendAction(); else topAction(label); });
             r1.addView(b,lp(1));
         }
