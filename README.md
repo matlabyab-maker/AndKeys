@@ -15,3 +15,7 @@ Workflow uses Gradle 8.9 installed by the action, so no missing `gradlew` wrappe
 
 ## Enable
 Install the APK, open AndKeys, tap **Open keyboard settings**, enable AndKeys, then choose it from the Android keyboard picker.
+
+
+## Workflow fix
+The Android workflow does not request the obsolete `tools` SDK package. It installs only platform-tools, Android platform 35, and build-tools 35.0.0.
