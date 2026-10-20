@@ -100,21 +100,38 @@ public class AndKeysIME extends InputMethodService {
         return root;
     }
 
-    // Send asks the focused editor to submit instead of blindly inserting a newline.
-    // Web editors commonly expose SEND/GO/DONE as IME actions; Ctrl+Enter is a
-    // common submit shortcut for multiline chat editors. Do not fall back to plain
-    // Enter, because that can merely create a new line in a message textarea.
+    // Send must not behave like Enter or insert a newline.
+    // Use only the action advertised by the focused editor. Many web editors
+    // expose SEND/GO/DONE through EditorInfo; blindly trying several actions or
+    // sending Ctrl+Enter can be interpreted as a newline by a multiline editor.
     private void sendAction(){
         InputConnection ic=getCurrentInputConnection();
         if(ic==null) return;
-        int[] actions={EditorInfo.IME_ACTION_SEND,EditorInfo.IME_ACTION_GO,EditorInfo.IME_ACTION_DONE};
-        for(int action:actions){
-            if(ic.performEditorAction(action)) return;
+
+        EditorInfo info=getCurrentInputEditorInfo();
+        if(info==null) return;
+
+        // A custom action label is supplied by some apps and WebView editors.
+        if(info.actionLabel!=null && info.actionLabel.length()>0){
+            ic.performEditorAction(info.actionId);
+            return;
         }
-        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_CTRL_LEFT));
-        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN,KeyEvent.KEYCODE_ENTER));
-        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_ENTER));
-        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,KeyEvent.KEYCODE_CTRL_LEFT));
+
+        int action=info.imeOptions & EditorInfo.IME_MASK_ACTION;
+        switch(action){
+            case EditorInfo.IME_ACTION_SEND:
+            case EditorInfo.IME_ACTION_GO:
+            case EditorInfo.IME_ACTION_DONE:
+            case EditorInfo.IME_ACTION_SEARCH:
+            case EditorInfo.IME_ACTION_NEXT:
+            case EditorInfo.IME_ACTION_PREVIOUS:
+                ic.performEditorAction(action);
+                break;
+            default:
+                // No submit action advertised by the focused editor. Do not send
+                // Enter/Ctrl+Enter: in website textareas that creates a new line.
+                break;
+        }
     }
     private void topAction(String label){
         InputConnection ic=getCurrentInputConnection(); if(ic==null)return;
